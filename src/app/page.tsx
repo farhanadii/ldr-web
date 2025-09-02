@@ -7,7 +7,6 @@ import {
   Send,
   TimerReset,
   Sparkles,
-  Gift,
   Gamepad2,
   Clock,
   Globe2,
@@ -34,7 +33,12 @@ const accent = {
 
 const cuteGradients = accent.rose.grad;
 
-export const DEFAULT_LETTER = `Dear you,\n\nI’m proud of us. Even when miles apart, you’re always my safe place. I can’t wait to hold your hand again.\n\nWith love,\n— me`;
+export const DEFAULT_LETTER = `Dear you,
+
+I’m proud of us. Even when miles apart, you’re always my safe place. I can’t wait to hold your hand again.
+
+With love,
+— me`;
 
 export function tzDiffHours(a: string, b: string) {
   try {
@@ -82,7 +86,7 @@ export function timeAt(t: Date, tz: string) {
   return { h, m, minutes: h * 60 + m };
 }
 
-export function isAwake(t: Date, tz: string, start = 8, end = 22) {
+export function isAwake(t: Date, tz: string, start = 8, end = 24) {
   const { h } = timeAt(t, tz);
   return h >= start && h < end;
 }
@@ -159,7 +163,7 @@ function Card({ children, className = "" }: { children: React.ReactNode; classNa
   );
 }
 
-function useFavicon(title = "Little Love Hub — Pro") {
+function useFavicon(title = "Little Love Hub") {
   useEffect(() => {
     document.title = title;
     const svg = encodeURIComponent(
@@ -199,6 +203,14 @@ function Hero() {
 
   return (
     <div className={`relative overflow-hidden rounded-[32px] px-6 md:px-10 py-12 md:py-16 bg-gradient-to-br ${cuteGradients[idx]} text-slate-900`}>
+      {/* live wallpaper overlay */}
+      <motion.div
+        aria-hidden
+        className="absolute inset-0 -z-10"
+        style={{ backgroundImage: "radial-gradient(40% 60% at 20% 20%, rgba(244,114,182,0.35), transparent), radial-gradient(40% 60% at 80% 30%, rgba(253,164,175,0.35), transparent), radial-gradient(50% 70% at 50% 80%, rgba(216,180,254,0.3), transparent)" }}
+        animate={{ backgroundPosition: ["0% 0%", "100% 50%", "0% 0%"] }}
+        transition={{ duration: 20, repeat: Infinity, ease: "linear" }}
+      />
       <motion.div initial={{ opacity: 0, y: 10 }} animate={{ opacity: 1, y: 0 }} transition={{ duration: 0.6 }}>
         <div className="flex items-center justify-center gap-2 text-sm mb-3 opacity-90">
           <Sparkles size={18} /> <span>Little Love Hub</span>
@@ -249,45 +261,60 @@ function Hero() {
 }
 
 // -----------------
-// Surprise Box (cute coupons + random compliment)
+// Placeholders for gallery & memory game
 // -----------------
-function SurpriseBox() {
-  const compliments = [
-    "Your laugh is my favorite sound.",
-    "You make distance feel tiny.",
-    "Every day with you is a win.",
-    "You are the softest part of my day.",
-  ];
+const placeholders = [
+  "https://images.unsplash.com/photo-1517841905240-472988babdf9?q=80&w=800&auto=format&fit=crop",
+  "https://images.unsplash.com/photo-1524253482453-3fed8d2fe12b?q=80&w=800&auto=format&fit=crop",
+  "https://images.unsplash.com/photo-1519681393784-d120267933ba?q=80&w=800&auto=format&fit=crop",
+  "https://images.unsplash.com/photo-1520975922323-c2b05beb22d5?q=80&w=800&auto=format&fit=crop",
+  "https://images.unsplash.com/photo-1529626455594-4ff0802cfb7e?q=80&w=800&auto=format&fit=crop",
+  "https://images.unsplash.com/photo-1529156069898-49953e39b3ac?q=80&w=800&auto=format&fit=crop",
+  "https://images.unsplash.com/photo-1503342217505-b0a15cf70489?q=80&w=800&auto=format&fit=crop",
+  "https://images.unsplash.com/photo-1494790108377-be9c29b29330?q=80&w=800&auto=format&fit=crop",
+];
+
+// -----------------
+// Photo Gallery (square slideshow)
+// -----------------
+function PhotoGallery() {
+  const imgs = placeholders;
   const [idx, setIdx] = useState(0);
   useEffect(() => {
-    const t = setInterval(() => setIdx((i) => (i + 1) % compliments.length), 3500);
+    const t = setInterval(() => setIdx((i) => (i + 1) % imgs.length), 2800);
     return () => clearInterval(t);
-  }, []);
-
-  type Coupon = { id: number; text: string; used: boolean };
-  const [coupons, setCoupons] = usePersistentState<Coupon[]>("ldr_coupons", [
-    { id: 1, text: "1× Long Voice Call – no rush", used: false },
-    { id: 2, text: "Your song choice – I’ll listen fully", used: false },
-    { id: 3, text: "Virtual cafe date – I bring snacks", used: false },
-  ]);
-
-  function toggle(id: number) { setCoupons(coupons.map(c => c.id === id ? { ...c, used: !c.used } : c)); }
+  }, [imgs.length]);
 
   return (
     <Card className="relative overflow-hidden">
-      <div className="absolute -right-10 -top-10 w-48 h-48 bg-rose-200/30 rounded-full blur-3xl" />
-      <div className="absolute -left-8 -bottom-8 w-40 h-40 bg-pink-200/30 rounded-full blur-3xl" />
-      <h2 className="text-xl md:text-2xl font-bold flex items-center gap-2"><Gift className="w-5 h-5"/> Surprise box</h2>
-      <motion.p key={idx} initial={{ opacity: 0, y: 4 }} animate={{ opacity: 1, y: 0 }} className="mt-2 text-slate-700">{compliments[idx]}</motion.p>
-      <div className="mt-4 grid gap-2">
-        {coupons.map(c => (
-          <button key={c.id} onClick={() => toggle(c.id)} className={`text-left p-3 rounded-2xl border bg-white/90 hover:bg-white transition flex items-center justify-between ${c.used ? "opacity-60" : ""}`}>
-            <span className="text-sm">{c.text}</span>
-            <span className={`text-xs px-2 py-1 rounded-lg border ${c.used ? "bg-slate-100" : "bg-rose-100"}`}>{c.used ? "Redeemed" : "Save"}</span>
-          </button>
+      <h2 className="text-xl md:text-2xl font-bold flex items-center gap-2"><ListChecks className="w-5 h-5"/> Our gallery</h2>
+      <div className="mt-3 aspect-square w-full rounded-2xl overflow-hidden relative border bg-white">
+        {/* current slide */}
+        <AnimatePresence initial={false} mode="wait">
+          <motion.img
+            key={idx}
+            src={imgs[idx]}
+            alt="gallery"
+            className="absolute inset-0 w-full h-full object-cover"
+            initial={{ opacity: 0, scale: 1.03 }}
+            animate={{ opacity: 1, scale: 1 }}
+            exit={{ opacity: 0, scale: 0.97 }}
+            transition={{ duration: 0.5 }}
+          />
+        </AnimatePresence>
+      </div>
+      {/* dots */}
+      <div className="mt-3 flex justify-center gap-1.5">
+        {imgs.map((_, i) => (
+          <button
+            key={i}
+            onClick={() => setIdx(i)}
+            className={`h-2.5 w-2.5 rounded-full border ${i === idx ? "bg-rose-500 border-rose-500" : "bg-white border-slate-200"}`}
+            aria-label={`Go to slide ${i + 1}`}
+          />
         ))}
       </div>
-      <p className="text-[10px] text-slate-500 mt-2">Redeem by tapping – toggles between saved and redeemed. Stored only on this device.</p>
+      <p className="text-[10px] text-slate-500 mt-2">Square slideshow that cycles automatically. Tap dots to jump.</p>
     </Card>
   );
 }
@@ -338,37 +365,164 @@ function Notes() {
 }
 
 // -----------------
-// Time Capsule (date → single note)
+// Time Capsule (strict rules + history view)
 // -----------------
 function TimeCapsule() {
   const [map, setMap] = usePersistentState<Record<string, string>>("ldr_capsule_map", {});
-  const [dateISO, setDateISO] = useState<string>(() => new Date().toISOString().slice(0,10));
-  const note = map[dateISO] || "No note prepared for this date yet.";
-  const [editing, setEditing] = useState(false);
+
+  // helpers
+  const pad = (n: number) => String(n).padStart(2, "0");
+  const toISODateLocal = (d: Date) => `${d.getFullYear()}-${pad(d.getMonth() + 1)}-${pad(d.getDate())}`;
+  const parseISODateLocal = (iso: string) => {
+    const [y, m, d] = iso.split("-").map(Number);
+    return new Date(y, (m || 1) - 1, d || 1);
+  };
+
+  const today = new Date();
+  const todayISO = toISODateLocal(today);
+
+  const [dateISO, setDateISO] = useState<string>(() => todayISO);
+  const [mode, setMode] = useState<"view" | "make" | "history">("view");
   const [text, setText] = useState("");
-  useEffect(() => { setText(map[dateISO] || ""); }, [dateISO, map]);
-  function save() { const next = { ...map }; if (text.trim()) next[dateISO] = text.trim(); else delete next[dateISO]; setMap(next); setEditing(false); }
+
+  // derived
+  const sel = parseISODateLocal(dateISO);
+  const nowDay = parseISODateLocal(todayISO);
+  const daysUntil = Math.floor((sel.getTime() - nowDay.getTime()) / 86400000);
+
+  const canView = daysUntil === 0;
+  const canEdit = daysUntil >= 7;
+  const lockedFuture = daysUntil > 0;
+  const past = daysUntil < 0;
+
+  useEffect(() => {
+    setText(map[dateISO] || "");
+  }, [dateISO, map]);
+
+  function save() {
+    if (!canEdit) return;
+    const next = { ...map };
+    if (text.trim()) next[dateISO] = text.trim();
+    else delete next[dateISO];
+    setMap(next);
+    setMode("view");
+  }
+
+  const revealMsg = lockedFuture
+    ? `Locked — opens in ${daysUntil} day${daysUntil === 1 ? "" : "s"}.`
+    : past
+    ? "Closed — only visible on its date."
+    : "";
 
   return (
     <Card>
-      <h2 className="text-xl md:text-2xl font-bold flex items-center gap-2"><TimerReset className="w-5 h-5"/> Time capsule</h2>
-      <p className="text-sm text-slate-700 mt-1">Pick a date to reveal exactly one prepared note.</p>
-      <div className="mt-3 flex flex-col md:flex-row gap-2 items-start">
-        <label className="text-sm">Date
-          <input type="date" value={dateISO} onChange={(e) => setDateISO(e.target.value)} className="mt-1 w-full rounded-xl border px-3 py-2 focus:outline-none focus:ring-2 ring-rose-300"/>
+      <h2 className="text-xl md:text-2xl font-bold flex items-center gap-2">
+        <TimerReset className="w-5 h-5" /> Time capsule
+      </h2>
+      <p className="text-sm text-slate-700 mt-1">
+        Notes can be <span className="font-semibold">made ≥7 days before</span> their date and
+        are <span className="font-semibold">only revealed on that exact day</span>.
+      </p>
+
+      <div className="mt-3 grid grid-cols-1 md:grid-cols-2 gap-3 items-end">
+        <label className="text-sm">
+          Date
+          <input
+            type="date"
+            value={dateISO}
+            onChange={(e) => setDateISO(e.target.value)}
+            className="mt-1 w-full rounded-xl border px-3 py-2 focus:outline-none focus:ring-2 ring-rose-300"
+          />
         </label>
-        <button onClick={() => setEditing((v) => !v)} className="rounded-xl px-4 py-2 border bg-white hover:bg-rose-50">{editing ? "Done" : "Manage note"}</button>
+        <div className="flex gap-2 justify-start md:justify-end">
+          <button
+            onClick={() => setMode("make")}
+            disabled={!canEdit}
+            className={`rounded-xl px-4 py-2 border bg-white hover:bg-rose-50 ${
+              !canEdit ? "opacity-50 cursor-not-allowed" : ""
+            }`}
+          >
+            Make note
+          </button>
+          <button
+            onClick={() => setMode("history")}
+            className="rounded-xl px-4 py-2 border bg-white hover:bg-rose-50"
+          >
+            History
+          </button>
+        </div>
       </div>
-      {!editing ? (
-        <motion.div key={dateISO} initial={{ opacity: 0, y: 6 }} animate={{ opacity: 1, y: 0 }} className="mt-4 rounded-2xl border bg-white p-4 text-sm">{note}</motion.div>
+
+      {/* content */}
+      {mode === "make" ? (
+        <div className="mt-4">
+          {!canEdit ? (
+            <div className="rounded-2xl border bg-white p-4 text-sm text-slate-600">
+              You can only create/edit notes 7+ days before the date.
+            </div>
+          ) : (
+            <>
+              <textarea
+                value={text}
+                onChange={(e) => setText(e.target.value)}
+                rows={5}
+                className="w-full rounded-2xl border p-3 focus:outline-none focus:ring-2 ring-rose-300"
+                placeholder="Write the note for this date…"
+              />
+              <div className="mt-2 flex gap-2">
+                <button
+                  onClick={save}
+                  className="rounded-xl px-4 py-2 bg-rose-500 text-white hover:bg-rose-600"
+                >
+                  Save
+                </button>
+                <button
+                  onClick={() => {
+                    setText("");
+                    const next = { ...map };
+                    delete next[dateISO];
+                    setMap(next);
+                    setMode("view");
+                  }}
+                  className="rounded-xl px-4 py-2 border"
+                >
+                  Clear
+                </button>
+              </div>
+            </>
+          )}
+        </div>
+      ) : mode === "history" ? (
+        <div className="mt-4 rounded-2xl border bg-white p-4 text-sm max-h-60 overflow-y-auto">
+          {Object.entries(map)
+            .filter(([d]) => parseISODateLocal(d) < nowDay)
+            .sort(([a], [b]) => (a > b ? -1 : 1))
+            .map(([d, note]) => (
+              <div key={d} className="mb-3 last:mb-0">
+                <div className="text-xs text-slate-500">{d}</div>
+                <div className="rounded-lg border p-2 bg-slate-50 mt-1">{note}</div>
+              </div>
+            ))}
+          {Object.entries(map).filter(([d]) => parseISODateLocal(d) < nowDay).length === 0 && (
+            <div className="text-slate-500 text-sm">No past notes yet.</div>
+          )}
+        </div>
       ) : (
         <div className="mt-4">
-          <textarea value={text} onChange={(e) => setText(e.target.value)} rows={5} className="w-full rounded-2xl border p-3 focus:outline-none focus:ring-2 ring-rose-300" placeholder="Write the note for this date…" />
-          <div className="mt-2 flex gap-2">
-            <button onClick={save} className="rounded-xl px-4 py-2 bg-rose-500 text-white hover:bg-rose-600">Save note</button>
-            <button onClick={() => { setText(""); save(); }} className="rounded-xl px-4 py-2 border">Clear</button>
-          </div>
-          <p className="text-[10px] text-slate-500 mt-2">Notes are private (saved on this device).</p>
+          {canView ? (
+            <motion.div
+              key={dateISO}
+              initial={{ opacity: 0, y: 6 }}
+              animate={{ opacity: 1, y: 0 }}
+              className="rounded-2xl border bg-white p-4 text-sm"
+            >
+              {map[dateISO] || "No note prepared for this date."}
+            </motion.div>
+          ) : (
+            <div className="rounded-2xl border bg-white p-4 text-sm text-slate-600">
+              {revealMsg}
+            </div>
+          )}
         </div>
       )}
     </Card>
@@ -485,73 +639,255 @@ function HeartGame() {
 // Time Zones Pro (Sydney ↔ Toronto) with visualization — Toronto LOCKED
 // -----------------
 function DualClockPro() {
-  const [myTz, setMyTz] = useState<string>(() => { try { return localStorage.getItem("ldr_my_tz") || "Australia/Sydney"; } catch { return "Australia/Sydney"; } });
-  const partnerTz = "America/Toronto"; // locked
-  const [now, setNow] = useState(new Date());
-  useEffect(() => { const t = setInterval(() => setNow(new Date()), 1000); return () => clearInterval(t); }, []);
-  useEffect(() => { try { localStorage.setItem("ldr_my_tz", myTz); } catch {} }, [myTz]);
+  // Fixed timezones
+  const myTz = "Australia/Sydney";
+  const partnerTz = "America/Toronto";
 
-  function fmt(date: Date, tz: string) {
-    try { return new Intl.DateTimeFormat([], { hour: "2-digit", minute: "2-digit", second: "2-digit", weekday: "short", hour12: false, timeZone: tz }).format(date); } catch { return "Invalid timezone"; }
+  const [now, setNow] = useState(new Date());
+  useEffect(() => {
+    const t = setInterval(() => setNow(new Date()), 1000);
+    return () => clearInterval(t);
+  }, []);
+
+  // Viewer local timezone (used only for the Overlap row marker)
+  const viewerTz = useMemo(() => {
+    try {
+      return Intl.DateTimeFormat().resolvedOptions().timeZone || myTz;
+    } catch {
+      return myTz;
+    }
+  }, []);
+
+  // --- Accurate timezone offset (minutes) for any IANA TZ ---
+  function tzOffsetMinutes(tz: string, at: Date) {
+    const parts = new Intl.DateTimeFormat("en-GB", {
+      timeZone: tz,
+      year: "numeric",
+      month: "2-digit",
+      day: "2-digit",
+      hour: "2-digit",
+      minute: "2-digit",
+      second: "2-digit",
+      hour12: false,
+    }).formatToParts(at);
+
+    const get = (t: string) => parts.find(p => p.type === t)?.value || "00";
+    const y = Number(get("year"));
+    const m = Number(get("month"));
+    const d = Number(get("day"));
+    const h = Number(get("hour"));
+    const mi = Number(get("minute"));
+    const s = Number(get("second"));
+
+    // This is the epoch ms IF those parts were UTC
+    const asUTC = Date.UTC(y, m - 1, d, h, mi, s);
+    // The real epoch ms is at.getTime(). Difference is the offset
+    const offsetMs = asUTC - at.getTime();
+    return Math.round(offsetMs / 60000); // minutes
   }
 
-  const delta = tzDiffHours(myTz, partnerTz);
-  const timeline = computeOverlapTimeline(now, myTz, partnerTz, 15);
-  const nextWin = findNextGoodWindow(now, myTz, partnerTz, 45);
+  function tzDiffHoursAccurate(a: string, b: string, at: Date) {
+    const aMin = tzOffsetMinutes(a, at);
+    const bMin = tzOffsetMinutes(b, at);
+    return (bMin - aMin) / 60;
+  }
+
+  // Consistent formatter
+  function fmt(date: Date, tz: string) {
+    try {
+      return new Intl.DateTimeFormat([], {
+        weekday: "short",
+        hour: "2-digit",
+        minute: "2-digit",
+        second: "2-digit",
+        hour12: false,
+        timeZone: tz,
+      }).format(date);
+    } catch {
+      return "Invalid timezone";
+    }
+  }
+
+  // Awake window 08:00–24:00
+  function computeOverlapTimeline24(base: Date, tzA: string, tzB: string, stepMin = 15) {
+    const items: { idx: number; when: Date; aAwake: boolean; bAwake: boolean; both: boolean }[] = [];
+    const start = new Date(base.getTime());
+    start.setSeconds(0, 0);
+    for (let i = 0; i < Math.floor(1440 / stepMin); i++) {
+      const when = new Date(start.getTime() + i * stepMin * 60000);
+      const aAwake = isAwake(when, tzA, 8, 24);
+      const bAwake = isAwake(when, tzB, 8, 24);
+      items.push({ idx: i, when, aAwake, bAwake, both: aAwake && bAwake });
+    }
+    return items;
+  }
+
+  function findNextGoodWindow24(base: Date, tzA: string, tzB: string, minMinutes = 45) {
+    const timeline = computeOverlapTimeline24(base, tzA, tzB, 15);
+    let startIdx = -1;
+    for (let i = 0; i < timeline.length; i++) {
+      if (timeline[i].both) {
+        if (startIdx === -1) startIdx = i;
+      } else if (startIdx !== -1) {
+        const len = (i - startIdx) * 15;
+        if (len >= minMinutes) {
+          const start = new Date(timeline[startIdx].when);
+          const end = new Date(timeline[i - 1].when.getTime() + 15 * 60000);
+          return { start, end };
+        }
+        startIdx = -1;
+      }
+    }
+    if (startIdx !== -1) {
+      const len = (timeline.length - startIdx) * 15;
+      if (len >= minMinutes) {
+        const start = new Date(timeline[startIdx].when);
+        const end = new Date(timeline[timeline.length - 1].when.getTime() + 15 * 60000);
+        return { start, end };
+      }
+    }
+    return null;
+  }
+
+  const delta = tzDiffHoursAccurate(myTz, partnerTz, now); // <-- no longer 0
+  const timeline = computeOverlapTimeline24(now, myTz, partnerTz, 15);
+  const nextWin = findNextGoodWindow24(now, myTz, partnerTz, 45);
 
   function toLabel(d: Date, tz: string) {
     const p = new Intl.DateTimeFormat("en-GB", { hour: "2-digit", minute: "2-digit", hour12: false, timeZone: tz }).formatToParts(d);
-    const h = p.find(x => x.type === "hour")?.value || "00"; const m = p.find(x => x.type === "minute")?.value || "00"; return `${h}:${m}`;
+    const h = p.find(x => x.type === "hour")?.value || "00";
+    const m = p.find(x => x.type === "minute")?.value || "00";
+    return `${h}:${m}`;
   }
 
+  // “time until next window” (viewer’s local clock for countdown precision)
+  const nextIn = useMemo(() => {
+    if (!nextWin) return null;
+    const ms = nextWin.start.getTime() - now.getTime();
+    const mins = Math.max(0, Math.floor(ms / 60000));
+    const h = Math.floor(mins / 60);
+    const m = mins % 60;
+    return { h, m };
+  }, [nextWin, now]);
+
+  const people = [
+    { label: "Farhan", tz: myTz, tzLabel: "Australia/Sydney" },
+    { label: "Nabila", tz: partnerTz, tzLabel: "America/Toronto" },
+  ] as const;
+
   return (
-    <Card>
-      <h2 className="text-xl md:text-2xl font-bold flex items-center gap-2"><Globe2 className="w-5 h-5"/> Sydney ↔ Toronto</h2>
+    <Card className="h-full">
+      <h2 className="text-xl md:text-2xl font-bold flex items-center gap-2">
+        <Globe2 className="w-5 h-5" /> Sydney ↔ Toronto
+      </h2>
+
+      {/* Person tiles (same layout, aligned) */}
       <div className="grid md:grid-cols-2 gap-4 mt-3">
-        <div className="rounded-2xl p-4 border bg-white/70">
-          <div className="text-xs uppercase tracking-wide text-slate-600">Farhan (Sydney)</div>
-          <div className="flex items-center justify-between mt-1">
-            <div className="text-2xl font-semibold">{fmt(now, myTz)}</div>
-            <input value={myTz} onChange={(e) => setMyTz(e.target.value)} className="text-xs rounded-lg border px-2 py-1" placeholder="Australia/Sydney" />
+        {people.map(p => (
+          <div key={p.label} className="rounded-2xl p-4 border bg-white/70">
+            <div className="flex items-center justify-between">
+              <div className="text-xs uppercase tracking-wide text-slate-600">{p.label}</div>
+              <div className="text-[10px] text-slate-500">{p.tzLabel}</div>
+            </div>
+            <div className="mt-1">
+              <div className="text-2xl font-semibold leading-tight tabular-nums">{fmt(now, p.tz)}</div>
+            </div>
           </div>
-        </div>
-        <div className="rounded-2xl p-4 border bg-white/70">
-          <div className="text-xs uppercase tracking-wide text-slate-600">Nabila (Toronto)</div>
-          <div className="flex items-center justify-between mt-1">
-            <div className="text-2xl font-semibold">{fmt(now, partnerTz)}</div>
-            <span className="text-xs text-slate-500">America/Toronto</span>
-          </div>
-        </div>
+        ))}
       </div>
 
-      <div className="mt-4 space-y-3">
-        {[{ label: "Farhan", tz: myTz }, { label: "Nabila", tz: partnerTz }].map((row, rIdx) => (
+      {/* Timelines */}
+      <div className="mt-4 space-y-4">
+        {people.map((row, rIdx) => (
           <div key={row.label} className="w-full">
-            <div className="flex justify-between text-[10px] text-slate-500 mb-1"><span>{row.label}</span><span>24h</span></div>
+            <div className="flex justify-between items-center text-[10px] text-slate-500 mb-1">
+              <span className="font-medium">{row.label}</span>
+              <span>24h</span>
+            </div>
+
             <div className="relative h-6 rounded-full overflow-hidden border bg-gradient-to-r from-slate-50 to-white">
-              <div className="absolute inset-0 grid grid-cols-24">{Array.from({ length: 24 }).map((_, h) => (<div key={h} className="border-r last:border-0 border-slate-100" />))}</div>
+              {/* hour grid */}
+              <div className="absolute inset-0 grid grid-cols-24">
+                {Array.from({ length: 24 }).map((_, h) => (
+                  <div key={h} className="border-r last:border-0 border-slate-100" />
+                ))}
+              </div>
+
+              {/* awake shading */}
               <div className="absolute inset-0 flex">
                 {timeline.map((t, i) => {
                   const awake = rIdx === 0 ? t.aAwake : t.bAwake;
-                  return <div key={i} className={`h-full ${awake ? "bg-rose-200/60" : "bg-transparent"}`} style={{ width: `${100/ timeline.length}%` }} />
+                  return (
+                    <div
+                      key={i}
+                      className={`h-full ${awake ? "bg-rose-200/60" : "bg-transparent"}`}
+                      style={{ width: `${100 / timeline.length}%` }}
+                    />
+                  );
                 })}
               </div>
-              <div className="absolute top-0 bottom-0 w-[2px] bg-rose-500" style={{ left: `${(timeAt(now, row.tz).minutes/ (24*60)) * 100}%` }} />
+
+              {/* NOW marker: use THAT ROW's timezone (fixes Nabila’s marker) */}
+              <div
+                className="absolute top-0 bottom-0 w-[2px] bg-rose-500"
+                style={{ left: `${(timeAt(now, row.tz).minutes / (24 * 60)) * 100}%` }}
+              />
+            </div>
+
+            {/* ticks */}
+            <div className="mt-1 flex justify-between text-[9px] text-slate-400 px-0.5">
+              {Array.from({ length: 9 }).map((_, i) => (
+                <span key={i}>{i * 3}</span>
+              ))}
             </div>
           </div>
         ))}
 
+        {/* Overlap row: marker in viewer’s local time (as requested previously) */}
         <div>
-          <div className="flex justify-between text-[10px] text-slate-500 mb-1"><span>Overlap</span><span>both awake</span></div>
-          <div className="relative h-6 rounded-full overflow-hidden border bg-gradient-to-r from-slate-50 to-white">
-            <div className="absolute inset-0 flex">{timeline.map((t, i) => (<div key={i} className={`h-full ${t.both ? "bg-emerald-200/70" : "bg-transparent"}`} style={{ width: `${100/ timeline.length}%` }} />))}</div>
-            <div className="absolute top-0 bottom-0 w-[2px] bg-rose-500" style={{ left: `${(timeAt(now, myTz).minutes/ (24*60)) * 100}%` }} />
+          <div className="flex justify-between items-center text-[10px] text-slate-500 mb-1">
+            <span>Overlap</span>
+            <span>both awake</span>
           </div>
-          <div className="text-xs text-slate-600 mt-1">Time difference: <span className="font-semibold">{delta >= 0 ? "+" + delta : delta}h</span>{nextWin ? (<span className="ml-2">Next good call window: <span className="font-semibold">{toLabel(nextWin.start, myTz)}–{toLabel(nextWin.end, myTz)}</span> (your time)</span>) : (<span className="ml-2">No 45‑min overlap in next 24h</span>)}</div>
+          <div className="relative h-6 rounded-full overflow-hidden border bg-gradient-to-r from-slate-50 to-white">
+            <div className="absolute inset-0 flex">
+              {timeline.map((t, i) => (
+                <div
+                  key={i}
+                  className={`h-full ${t.both ? "bg-emerald-200/70" : "bg-transparent"}`}
+                  style={{ width: `${100 / timeline.length}%` }}
+                />
+              ))}
+            </div>
+            <div
+              className="absolute top-0 bottom-0 w-[2px] bg-rose-500"
+              style={{ left: `${(timeAt(now, viewerTz).minutes / (24 * 60)) * 100}%` }}
+            />
+          </div>
+
+          <div className="mt-1 text-xs text-slate-600 flex flex-wrap items-center gap-x-3 gap-y-1">
+            <span>
+              Time difference: <span className="font-semibold">{delta >= 0 ? "+" + delta : delta}h</span>
+            </span>
+            {nextWin ? (
+              <>
+                <span>
+                  Next window:{" "}
+                  <span className="font-semibold">
+                    {toLabel(nextWin.start, viewerTz)}–{toLabel(nextWin.end, viewerTz)}
+                  </span>{" "}
+                  (your time)
+                </span>
+                <span className="text-[11px] px-2 py-0.5 rounded-lg border bg-white/70">
+                  in {nextIn!.h}h {String(nextIn!.m).padStart(2, "0")}m
+                </span>
+              </>
+            ) : (
+              <span>No 45-min overlap in next 24h</span>
+            )}
+          </div>
         </div>
       </div>
-
-      <div className="mt-2 text-[10px] text-slate-400">Awake window assumed 08:00–22:00 local. You can tweak in code if you want different hours.</div>
     </Card>
   );
 }
@@ -559,17 +895,6 @@ function DualClockPro() {
 // -----------------
 // Photo Memory Match (preselected deck only)
 // -----------------
-const placeholders = [
-  "https://images.unsplash.com/photo-1517841905240-472988babdf9?q=80&w=800&auto=format&fit=crop",
-  "https://images.unsplash.com/photo-1524253482453-3fed8d2fe12b?q=80&w=800&auto=format&fit=crop",
-  "https://images.unsplash.com/photo-1519681393784-d120267933ba?q=80&w=800&auto=format&fit=crop",
-  "https://images.unsplash.com/photo-1520975922323-c2b05beb22d5?q=80&w=800&auto=format&fit=crop",
-  "https://images.unsplash.com/photo-1529626455594-4ff0802cfb7e?q=80&w=800&auto=format&fit=crop",
-  "https://images.unsplash.com/photo-1529156069898-49953e39b3ac?q=80&w=800&auto=format&fit=crop",
-  "https://images.unsplash.com/photo-1503342217505-b0a15cf70489?q=80&w=800&auto=format&fit=crop",
-  "https://images.unsplash.com/photo-1494790108377-be9c29b29330?q=80&w=800&auto=format&fit=crop",
-];
-
 function PhotoMatch() {
   type Tile = { id: number; url: string; flipped: boolean; matched: boolean };
   const [deck, setDeck] = useState<Tile[]>([]);
@@ -726,11 +1051,11 @@ export default function LittleLoveHub() {
 
         {/* Feature grid */}
         <div className="grid grid-cols-1 md:grid-cols-2 gap-6 mt-8">
-          <SurpriseBox />
+          <Notes />
           <TimeCapsule />
         </div>
-        <div className="grid grid-cols-1 md:grid-cols-2 gap-6 mt-6">
-          <Notes />
+        <div className="grid grid-cols-1 md:grid-cols-2 gap-6 mt-6 items-stretch">
+          <PhotoGallery />
           <DualClockPro />
         </div>
         <div className="grid grid-cols-1 md:grid-cols-2 gap-6 mt-6">
