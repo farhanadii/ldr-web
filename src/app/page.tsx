@@ -264,14 +264,14 @@ function Hero() {
 // Placeholders for gallery & memory game
 // -----------------
 const placeholders = [
-  "https://images.unsplash.com/photo-1517841905240-472988babdf9?q=80&w=800&auto=format&fit=crop",
-  "https://images.unsplash.com/photo-1524253482453-3fed8d2fe12b?q=80&w=800&auto=format&fit=crop",
-  "https://images.unsplash.com/photo-1519681393784-d120267933ba?q=80&w=800&auto=format&fit=crop",
-  "https://images.unsplash.com/photo-1520975922323-c2b05beb22d5?q=80&w=800&auto=format&fit=crop",
-  "https://images.unsplash.com/photo-1529626455594-4ff0802cfb7e?q=80&w=800&auto=format&fit=crop",
-  "https://images.unsplash.com/photo-1529156069898-49953e39b3ac?q=80&w=800&auto=format&fit=crop",
-  "https://images.unsplash.com/photo-1503342217505-b0a15cf70489?q=80&w=800&auto=format&fit=crop",
-  "https://images.unsplash.com/photo-1494790108377-be9c29b29330?q=80&w=800&auto=format&fit=crop",
+  "/photos/OG1.jpg",
+  "/photos/OG2.jpg",
+  "/photos/OG3.jpg",
+  "/photos/OG4.jpg",
+  "/photos/OG5.jpg",
+  "/photos/OG6.jpg",
+  "/photos/OG7.jpg",
+  "/photos/OG8.jpg",
 ];
 
 // -----------------
