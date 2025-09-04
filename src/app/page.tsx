@@ -1279,10 +1279,6 @@ export default function LittleLoveHub() {
           <HeartGame />
         </div>
 
-        <div className="mt-6">
-          <DevTests />
-        </div>
-
         <footer className="mt-12 text-center text-xs text-slate-600">
           Built with care by Farhan{" "}
           <motion.span
