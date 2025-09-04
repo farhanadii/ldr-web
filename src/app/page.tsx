@@ -1099,7 +1099,7 @@ function DualClockPro() {
         {people.map((p) => {
           const day = weekdayLong(now, p.tz);
           const personSchedule =
-            (schedules[p.label] as Record<DayName, ClassSlot[] | undefined>) || {};
+            (schedules[p.label] as unknown as Record<DayName, ClassSlot[] | undefined>) || {};
           const todaySlots = personSchedule[day] ?? [];
           return (
             <div key={p.label}>
