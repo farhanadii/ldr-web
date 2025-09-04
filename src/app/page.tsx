@@ -1171,29 +1171,53 @@ function DualClockPro() {
 }
 
 // -----------------
-// Photo Memory Match (preselected deck only)
+// Photo Memory Match (preselected deck only) — fixed deps
 // -----------------
 function PhotoMatch() {
   type Tile = { id: number; url: string; flipped: boolean; matched: boolean };
+
   const [deck, setDeck] = useState<Tile[]>([]);
   const [moves, setMoves] = useState(0);
   const [flippedIds, setFlippedIds] = useState<number[]>([]);
 
-  function reset() { setDeck(buildPhotoDeck(placeholders) as Tile[]); setMoves(0); setFlippedIds([]); }
-  useEffect(() => { reset(); }, []);
+  const reset = React.useCallback(() => {
+    setDeck(buildPhotoDeck(placeholders) as Tile[]);
+    setMoves(0);
+    setFlippedIds([]);
+  }, []);
+
+  useEffect(() => { reset(); }, [reset]);
 
   function flip(idx: number) {
     const t = deck[idx];
     if (!t || t.flipped || t.matched || flippedIds.length === 2) return;
-    const newTiles = deck.slice(); newTiles[idx] = { ...t, flipped: true }; setDeck(newTiles);
-    const newFlipped = [...flippedIds, idx]; setFlippedIds(newFlipped);
+
+    const newTiles = deck.slice();
+    newTiles[idx] = { ...t, flipped: true };
+    setDeck(newTiles);
+
+    const newFlipped = [...flippedIds, idx];
+    setFlippedIds(newFlipped);
+
     if (newFlipped.length === 2) {
       setMoves((m) => m + 1);
       const [a, b] = newFlipped;
       if (newTiles[a].url === newTiles[b].url) {
-        setTimeout(() => { const t2 = newTiles.slice(); (t2[a] as Tile).matched = (t2[b] as Tile).matched = true; setDeck(t2); setFlippedIds([]); }, 250);
+        setTimeout(() => {
+          const t2 = newTiles.slice();
+          (t2[a] as Tile).matched = true;
+          (t2[b] as Tile).matched = true;
+          setDeck(t2);
+          setFlippedIds([]);
+        }, 250);
       } else {
-        setTimeout(() => { const t2 = newTiles.slice(); (t2[a] as Tile).flipped = (t2[b] as Tile).flipped = false; setDeck(t2); setFlippedIds([]); }, 450);
+        setTimeout(() => {
+          const t2 = newTiles.slice();
+          (t2[a] as Tile).flipped = false;
+          (t2[b] as Tile).flipped = false;
+          setDeck(t2);
+          setFlippedIds([]);
+        }, 450);
       }
     }
   }
@@ -1202,11 +1226,20 @@ function PhotoMatch() {
 
   return (
     <Card>
-      <h2 className="text-xl md:text-2xl font-bold flex items-center gap-2"><ListChecks className="w-5 h-5"/> Photo memory match</h2>
+      <h2 className="text-xl md:text-2xl font-bold flex items-center gap-2">
+        <ListChecks className="w-5 h-5" /> Photo memory match
+      </h2>
       <div className="mt-3 grid grid-cols-4 gap-2">
         {deck.map((t, i) => (
-          <button key={t.id} onClick={() => flip(i)} className={`h-20 md:h-24 rounded-2xl border overflow-hidden relative transition ${t.flipped || t.matched ? "bg-rose-100" : "bg-white active:scale-95"}`}>
+          <button
+            key={t.id}
+            onClick={() => flip(i)}
+            className={`h-20 md:h-24 rounded-2xl border overflow-hidden relative transition ${
+              t.flipped || t.matched ? "bg-rose-100" : "bg-white active:scale-95"
+            }`}
+          >
             {(t.flipped || t.matched) ? (
+              // You can switch to next/image later; this <img> warning doesn't block builds
               <img src={t.url} alt="tile" className="absolute inset-0 w-full h-full object-cover" />
             ) : (
               <span className="text-2xl">♥</span>
@@ -1215,8 +1248,12 @@ function PhotoMatch() {
         ))}
       </div>
       <div className="mt-3 flex items-center justify-between">
-        <div className="text-sm">Moves: <span className="font-semibold">{moves}</span> {won ? "— You matched all! 💗" : ""}</div>
-        <button onClick={reset} className="rounded-xl px-4 py-2 bg-rose-500 text-white hover:bg-rose-600">Restart</button>
+        <div className="text-sm">
+          Moves: <span className="font-semibold">{moves}</span> {won ? "— You matched all! 💗" : ""}
+        </div>
+        <button onClick={reset} className="rounded-xl px-4 py-2 bg-rose-500 text-white hover:bg-rose-600">
+          Restart
+        </button>
       </div>
     </Card>
   );
@@ -1260,41 +1297,58 @@ function SecretLetter() {
 }
 
 // -----------------
-// Developer self-tests (opt-in)
+// Developer self-tests (opt-in) — typed, no any
 // -----------------
 function DevTests() {
   const [tests, setTests] = useState<{ name: string; pass: boolean; detail?: string }[]>([]);
-  const show = (() => { try { return new URLSearchParams(window.location.search).get("tests") === "1"; } catch { return false; } })();
+  const show = (() => {
+    try {
+      return new URLSearchParams(window.location.search).get("tests") === "1";
+    } catch {
+      return false;
+    }
+  })();
 
   useEffect(() => {
     if (!show) return;
     const results: { name: string; pass: boolean; detail?: string }[] = [];
 
-    results.push({ name: "DEFAULT_LETTER contains greeting & signature", pass: typeof DEFAULT_LETTER === "string" && DEFAULT_LETTER.includes("Dear you,") && DEFAULT_LETTER.includes("— me") });
+    results.push({
+      name: "DEFAULT_LETTER contains greeting & signature",
+      pass:
+        typeof DEFAULT_LETTER === "string" &&
+        DEFAULT_LETTER.includes("Dear you,") &&
+        DEFAULT_LETTER.includes("— me"),
+    });
 
-    const deck = makeMemoryDeck(["A","B","C","D","E","F","G","H"]);
+    const deck = makeMemoryDeck(["A", "B", "C", "D", "E", "F", "G", "H"]);
     results.push({ name: "Memory deck size is 16", pass: deck.length === 16 });
 
-    const pd = buildPhotoDeck(["u1","u2","u3"]);
-    const uniqUrls = new Set(pd.map((t: any) => t.url)).size;
+    const pd = buildPhotoDeck(["u1", "u2", "u3"]);
+    type PhotoTile = (typeof pd)[number];
+    const uniqUrls = new Set(pd.map((t: PhotoTile) => t.url)).size;
     results.push({ name: "Photo deck length is 6 for 3", pass: pd.length === 6 });
     results.push({ name: "Photo deck has 3 unique", pass: uniqUrls === 3 });
 
     results.push({ name: "tzDiffHours(UTC, UTC) === 0", pass: tzDiffHours("UTC", "UTC") === 0 });
 
     const cd = countdownDiff(new Date(Date.now() + 24 * 3600 * 1000), new Date());
-    results.push({ name: "countdownDiff returns finite numbers", pass: !!cd && [cd!.days, cd!.hours, cd!.mins, cd!.secs].every(Number.isFinite) });
+    results.push({
+      name: "countdownDiff returns finite numbers",
+      pass: !!cd && [cd!.days, cd!.hours, cd!.mins, cd!.secs].every(Number.isFinite),
+    });
 
     const overlap60 = computeOverlapTimeline(new Date(), "Australia/Sydney", "America/Toronto", 60);
     results.push({ name: "Overlap timeline 24 steps (60m)", pass: overlap60.length === 24 });
 
-    // Extra: overlap at 15m granularity
     const overlap15 = computeOverlapTimeline(new Date(), "Australia/Sydney", "America/Toronto", 15);
     results.push({ name: "Overlap timeline 96 steps (15m)", pass: overlap15.length === 96 });
 
-    // Next-good-window returns object or null
     const win = findNextGoodWindow(new Date(), "Australia/Sydney", "America/Toronto", 45);
-    results.push({ name: "findNextGoodWindow returns object/null", pass: typeof win === "object" || win === null });
+    results.push({
+      name: "findNextGoodWindow returns object/null",
+      pass: typeof win === "object" || win === null,
+    });
 
     setTests(results);
   }, [show]);
@@ -1305,14 +1359,21 @@ function DevTests() {
       <h2 className="text-xl md:text-2xl font-bold flex items-center gap-2">🔧 Self-tests</h2>
       <ul className="mt-3 grid gap-2">
         {tests.map((t, i) => (
-          <li key={i} className={`p-3 rounded-2xl border ${t.pass ? "bg-emerald-50 border-emerald-200" : "bg-rose-50 border-rose-200"}`}>
+          <li
+            key={i}
+            className={`p-3 rounded-2xl border ${
+              t.pass ? "bg-emerald-50 border-emerald-200" : "bg-rose-50 border-rose-200"
+            }`}
+          >
             <span className="font-medium">{t.pass ? "✅ PASS" : "❌ FAIL"}</span>
             <span className="ml-2">{t.name}</span>
             {t.detail ? <span className="ml-2 text-xs opacity-70">{t.detail}</span> : null}
           </li>
         ))}
       </ul>
-      <p className="text-xs text-slate-500 mt-2">Add <code>?tests=1</code> to the URL to toggle these checks.</p>
+      <p className="text-xs text-slate-500 mt-2">
+        Add <code>?tests=1</code> to the URL to toggle these checks.
+      </p>
     </Card>
   );
 }
