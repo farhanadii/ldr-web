@@ -765,7 +765,7 @@ function HeartGame() {
         {overlay && (
           <div className="absolute inset-0 grid place-items-center text-center p-6 bg-white/75 backdrop-blur">
             <div className="max-w-sm w-full">
-              <h3 className="text-xl font-bold">Nice run!</h3>
+              <h3 className="text-xl font-bold">good girl</h3>
               <div className="mt-2 text-slate-700">
                 Hearts popped: <span className="font-semibold">{score}</span>
               </div>
@@ -1291,7 +1291,7 @@ export default function LittleLoveHub() {
         </div>
 
         <footer className="mt-12 text-center text-xs text-slate-600">
-          Built with care by Farhan{" "}
+          Built with love by Farhan{" "}
           <motion.span
             initial={{ scale: 1 }}
             animate={{ scale: [1, 1.15, 1] }}
