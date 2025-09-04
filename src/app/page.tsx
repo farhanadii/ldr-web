@@ -245,7 +245,7 @@ function Hero() {
           Long-Distance, Big Love
         </h1>
         <p className="mt-3 text-center text-base md:text-lg opacity-90">
-          A crafted space for us — countdown, time zones, capsule notes & games.
+          I made this because I miss uuuuuuuu
         </p>
 
         <motion.div

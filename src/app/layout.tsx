@@ -7,7 +7,7 @@ const geistMono = Geist_Mono({ variable: "--font-geist-mono", subsets: ["latin"]
 
 export const metadata: Metadata = {
   title: "Little Love Hub 💖",
-  description: "A crafted space for us — countdown, time zones, capsule notes & games.",
+  description: "I made this because I miss uuuuuuuu",
   icons: {
     icon: [
       { url: "/favicon1.png?v=2" },
