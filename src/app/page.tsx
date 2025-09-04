@@ -69,13 +69,6 @@ const accent = {
 
 const cuteGradients = accent.rose.grad;
 
-export const DEFAULT_LETTER = `Dear you,
-
-I’m proud of us. Even when miles apart, you’re always my safe place. I can’t wait to hold your hand again.
-
-With love,
-— me`;
-
 export function tzDiffHours(a: string, b: string) {
   try {
     const d = new Date();
@@ -1186,7 +1179,9 @@ function PhotoMatch() {
     setFlippedIds([]);
   }, []);
 
-  useEffect(() => { reset(); }, [reset]);
+  useEffect(() => {
+    reset();
+  }, [reset]);
 
   function flip(idx: number) {
     const t = deck[idx];
@@ -1239,7 +1234,6 @@ function PhotoMatch() {
             }`}
           >
             {(t.flipped || t.matched) ? (
-              // You can switch to next/image later; this <img> warning doesn't block builds
               <img src={t.url} alt="tile" className="absolute inset-0 w-full h-full object-cover" />
             ) : (
               <span className="text-2xl">♥</span>
@@ -1251,47 +1245,13 @@ function PhotoMatch() {
         <div className="text-sm">
           Moves: <span className="font-semibold">{moves}</span> {won ? "— You matched all! 💗" : ""}
         </div>
-        <button onClick={reset} className="rounded-xl px-4 py-2 bg-rose-500 text-white hover:bg-rose-600">
+        <button
+          onClick={reset}
+          className="rounded-xl px-4 py-2 bg-rose-500 text-white hover:bg-rose-600"
+        >
           Restart
         </button>
       </div>
-    </Card>
-  );
-}
-
-// -----------------
-// Secret letter
-// -----------------
-function SecretLetter() {
-  const [locked, setLocked] = useState<boolean>(() => { try { return !(localStorage.getItem("ldr_letter_unlocked") === "1"); } catch { return true; } });
-  const [pass, setPass] = useState("");
-  const [text, setText] = useState<string>(() => { try { return localStorage.getItem("ldr_letter") || DEFAULT_LETTER; } catch { return DEFAULT_LETTER; } });
-
-  function unlock() { if (pass.trim().toLowerCase() === "pinky promise") { setLocked(false); try { localStorage.setItem("ldr_letter_unlocked", "1"); } catch {} } }
-  function save() { try { localStorage.setItem("ldr_letter", text); } catch {} }
-  function lockBack() { setLocked(true); try { localStorage.setItem("ldr_letter_unlocked", "0"); } catch {} }
-
-  return (
-    <Card>
-      <h2 className="text-xl md:text-2xl font-bold flex items-center gap-2"><Lock className="w-5 h-5"/> Secret letter</h2>
-      {locked ? (
-        <div className="mt-3">
-          <p className="text-sm text-slate-700">Unlock with your passphrase (hint: magic words you both use). Demo passphrase: <span className="font-semibold">pinky promise</span>.</p>
-          <div className="mt-3 flex gap-2">
-            <input value={pass} onChange={(e) => setPass(e.target.value)} placeholder="Enter passphrase" className="flex-1 rounded-xl border px-3 py-2 focus:outline-none focus:ring-2 ring-rose-300"/>
-            <button onClick={unlock} className="rounded-xl px-4 py-2 bg-rose-500 text-white hover:bg-rose-600">Unlock</button>
-          </div>
-        </div>
-      ) : (
-        <div className="mt-3">
-          <textarea value={text} onChange={(e) => setText(e.target.value)} rows={6} className="w-full rounded-2xl border p-3 focus:outline-none focus:ring-2 ring-rose-300" />
-          <div className="mt-2 flex gap-2">
-            <button onClick={save} className="rounded-xl px-4 py-2 bg-rose-500 text-white hover:bg-rose-600">Save</button>
-            <button onClick={lockBack} className="rounded-xl px-4 py-2 border">Lock</button>
-          </div>
-          <p className="text-xs text-slate-500 mt-2">Saved only on this device.</p>
-        </div>
-      )}
     </Card>
   );
 }
