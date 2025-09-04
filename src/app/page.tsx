@@ -331,7 +331,7 @@ function Hero() {
 // -----------------
 // Placeholders for gallery & memory game
 // -----------------
-const placeholders = [
+const galleryImages = [
   "/photos/OG1.jpg",
   "/photos/OG2.jpg",
   "/photos/OG3.jpg",
@@ -342,11 +342,22 @@ const placeholders = [
   "/photos/OG8.jpg",
 ];
 
+const memoryImages = [
+  "/photos/PM1.jpg",
+  "/photos/PM2.jpg",
+  "/photos/PM3.jpg",
+  "/photos/PM4.jpg",
+  "/photos/PM5.jpg",
+  "/photos/PM6.jpg",
+  "/photos/PM7.jpg",
+  "/photos/PM8.jpg",
+];
+
 // -----------------
 // Photo Gallery (square slideshow)
 // -----------------
 function PhotoGallery() {
-  const imgs = placeholders;
+  const imgs = galleryImages;
   const [idx, setIdx] = useState(0);
   useEffect(() => {
     const t = setInterval(() => setIdx((i) => (i + 1) % imgs.length), 2800);
@@ -1174,7 +1185,7 @@ function PhotoMatch() {
   const [flippedIds, setFlippedIds] = useState<number[]>([]);
 
   const reset = React.useCallback(() => {
-    setDeck(buildPhotoDeck(placeholders) as Tile[]);
+    setDeck(buildPhotoDeck(memoryImages) as Tile[]);
     setMoves(0);
     setFlippedIds([]);
   }, []);
