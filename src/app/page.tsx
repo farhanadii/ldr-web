@@ -20,6 +20,42 @@ import {
 // -----------------------------
 // Constants & Pure Helpers (testable)
 // -----------------------------
+const schedules = {
+  Farhan: {
+    Monday: [
+      { start: "16:00", end: "18:00", label: "COMP2511" },
+      { start: "18:00", end: "20:00", label: "COMP6080" },
+    ],
+    Tuesday: [
+      { start: "18:00", end: "20:00", label: "COMP3900" },
+    ],
+    Thursday: [
+      { start: "14:00", end: "16:00", label: "COMP2511" },
+      { start: "18:00", end: "20:00", label: "COMP6080" },
+    ],
+    Friday: [
+      { start: "12:00", end: "13:00", label: "COMP2511" },
+      { start: "13:00", end: "15:00", label: "COMP2511" },
+      { start: "15:00", end: "17:00", label: "COMP3900" },
+      { start: "17:00", end: "18:00", label: "COMP6080" },
+    ],
+  },
+  Nabila: {
+    Tuesday: [
+      { start: "11:00", end: "13:00", label: "RSM43" },
+      { start: "14:00", end: "15:00", label: "AST101" },
+      { start: "15:00", end: "17:00", label: "CSC108" },
+    ],
+    Thursday: [
+      { start: "14:00", end: "15:00", label: "AST101" },
+      { start: "15:00", end: "16:00", label: "CSC108" },
+    ],
+    Friday: [
+      { start: "09:00", end: "11:00", label: "RSM43" },
+    ],
+  }
+} as const;
+
 const accent = {
   rose: {
     grad: [
@@ -163,25 +199,6 @@ function Card({ children, className = "" }: { children: React.ReactNode; classNa
   );
 }
 
-function useFavicon(title = "Little Love Hub") {
-  useEffect(() => {
-    document.title = title;
-    const svg = encodeURIComponent(
-      `<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 64 64'>
-        <rect width='64' height='64' rx='12' fill='#f8fafc'/>
-        <path d='M32 50c-1.6 0-3.2-.6-4.4-1.8L14 34.3c-3.9-3.9-3.9-10.2 0-14.1 3.9-3.9 10.2-3.9 14.1 0l3.9 3.9 3.9-3.9c3.9-3.9 10.2-3.9 14.1 0 3.9 3.9 3.9 10.2 0 14.1L36.4 48.2C35.2 49.4 33.6 50 32 50z' fill='#e11d48'/>
-      </svg>`
-    );
-    const link = document.createElement("link");
-    link.rel = "icon";
-    link.href = `data:image/svg+xml,${svg}`;
-    document.head.appendChild(link);
-    return () => {
-      try { document.head.removeChild(link); } catch {}
-    };
-  }, [title]);
-}
-
 // -----------------
 // Hero with Big Countdown (fixed date)
 // -----------------
@@ -196,57 +213,107 @@ function Hero() {
   const targetISO = "2026-01-10T00:00:00+11:00";
   const targetDate = useMemo(() => new Date(targetISO), []);
   const [now, setNow] = useState(new Date());
-  useEffect(() => { const t = setInterval(() => setNow(new Date()), 1000); return () => clearInterval(t); }, []);
+  useEffect(() => {
+    const t = setInterval(() => setNow(new Date()), 1000);
+    return () => clearInterval(t);
+  }, []);
   const diff = useMemo(() => countdownDiff(targetDate, now), [targetDate, now]);
   const isPast = now.getTime() >= targetDate.getTime();
-  const fixedLabel = new Intl.DateTimeFormat("en-GB", { day: "2-digit", month: "long", year: "numeric" }).format(targetDate);
+  const fixedLabel = new Intl.DateTimeFormat("en-GB", {
+    day: "2-digit",
+    month: "long",
+    year: "numeric",
+  }).format(targetDate);
 
   return (
-    <div className={`relative overflow-hidden rounded-[32px] px-6 md:px-10 py-12 md:py-16 bg-gradient-to-br ${cuteGradients[idx]} text-slate-900`}>
+    <div
+      className={`relative overflow-hidden rounded-[32px] px-6 md:px-10 py-12 md:py-16 bg-gradient-to-br ${cuteGradients[idx]} text-slate-900`}
+    >
       {/* live wallpaper overlay */}
       <motion.div
         aria-hidden
         className="absolute inset-0 -z-10"
-        style={{ backgroundImage: "radial-gradient(40% 60% at 20% 20%, rgba(244,114,182,0.35), transparent), radial-gradient(40% 60% at 80% 30%, rgba(253,164,175,0.35), transparent), radial-gradient(50% 70% at 50% 80%, rgba(216,180,254,0.3), transparent)" }}
+        style={{
+          backgroundImage:
+            "radial-gradient(40% 60% at 20% 20%, rgba(244,114,182,0.35), transparent), radial-gradient(40% 60% at 80% 30%, rgba(253,164,175,0.35), transparent), radial-gradient(50% 70% at 50% 80%, rgba(216,180,254,0.3), transparent)",
+        }}
         animate={{ backgroundPosition: ["0% 0%", "100% 50%", "0% 0%"] }}
         transition={{ duration: 20, repeat: Infinity, ease: "linear" }}
       />
-      <motion.div initial={{ opacity: 0, y: 10 }} animate={{ opacity: 1, y: 0 }} transition={{ duration: 0.6 }}>
+      <motion.div
+        initial={{ opacity: 0, y: 10 }}
+        animate={{ opacity: 1, y: 0 }}
+        transition={{ duration: 0.6 }}
+      >
         <div className="flex items-center justify-center gap-2 text-sm mb-3 opacity-90">
           <Sparkles size={18} /> <span>Little Love Hub</span>
         </div>
-        <h1 className="text-center text-4xl md:text-6xl font-extrabold tracking-tight">Long-Distance, Big Love</h1>
-        <p className="mt-3 text-center text-base md:text-lg opacity-90">A crafted space for us — countdown, time zones, capsule notes & games.</p>
+        <h1 className="text-center text-4xl md:text-6xl font-extrabold tracking-tight">
+          Long-Distance, Big Love
+        </h1>
+        <p className="mt-3 text-center text-base md:text-lg opacity-90">
+          A crafted space for us — countdown, time zones, capsule notes & games.
+        </p>
 
-        <motion.div className="mt-8 md:mt-10" initial={{ opacity: 0 }} animate={{ opacity: 1 }} transition={{ delay: 0.2 }}>
+        <motion.div
+          className="mt-8 md:mt-10"
+          initial={{ opacity: 0 }}
+          animate={{ opacity: 1 }}
+          transition={{ delay: 0.2 }}
+        >
           <div className="mx-auto max-w-5xl rounded-2xl border border-white/60 bg-white/40 backdrop-blur-xl p-4 md:p-6 shadow-[inset_0_1px_0_rgba(255,255,255,0.6)]">
             <div className="flex items-center justify-between">
-              <div className="text-sm md:text-base font-medium text-slate-800 flex items-center gap-2"><Calendar className="w-5 h-5"/> Next time we hug</div>
+              <div className="text-sm md:text-base font-medium text-slate-800 flex items-center gap-2">
+                <Calendar className="w-5 h-5" /> Next time we hug
+              </div>
               <div />
             </div>
             {!isPast ? (
               <>
                 <div className="mt-5 grid grid-cols-4 gap-2 md:gap-3 text-center">
-                  {diff ? ([
-                    { label: "Days", v: diff.days },
-                    { label: "Hours", v: diff.hours },
-                    { label: "Minutes", v: diff.mins },
-                    { label: "Seconds", v: diff.secs },
-                  ]).map((b) => (
-                    <motion.div key={b.label} initial={{ opacity: 0, y: 8 }} animate={{ opacity: 1, y: 0 }} className="rounded-2xl p-3 md:p-5 bg-white/70 border border-white/70">
-                      <div className="text-4xl md:text-6xl lg:text-7xl font-black tabular-nums tracking-tight">{String(b.v).padStart(2, "0")}</div>
-                      <div className="text-[10px] md:text-xs tracking-wide uppercase text-slate-700 mt-1">{b.label}</div>
-                    </motion.div>
-                  )) : (
-                    <div className="col-span-4 text-slate-800 text-sm md:text-base">Countdown starting…</div>
+                  {diff ? (
+                    [
+                      { label: "Days", v: diff.days },
+                      { label: "Hours", v: diff.hours },
+                      { label: "Minutes", v: diff.mins },
+                      { label: "Seconds", v: diff.secs },
+                    ].map((b) => (
+                      <motion.div
+                        key={b.label}
+                        initial={{ opacity: 0, y: 8 }}
+                        animate={{ opacity: 1, y: 0 }}
+                        className="rounded-2xl p-3 md:p-5 bg-white/70 border border-white/70"
+                      >
+                        {/* Hydration-safe countdown number */}
+                        <div
+                          suppressHydrationWarning
+                          className="text-4xl md:text-6xl lg:text-7xl font-black tabular-nums tracking-tight"
+                        >
+                          {String(b.v).padStart(2, "0")}
+                        </div>
+                        <div className="text-[10px] md:text-xs tracking-wide uppercase text-slate-700 mt-1">
+                          {b.label}
+                        </div>
+                      </motion.div>
+                    ))
+                  ) : (
+                    <div className="col-span-4 text-slate-800 text-sm md:text-base">
+                      Countdown starting…
+                    </div>
                   )}
                 </div>
-                <div className="mt-3 text-center text-xs md:text-sm text-slate-700">{fixedLabel}</div>
+                <div className="mt-3 text-center text-xs md:text-sm text-slate-700">
+                  {fixedLabel}
+                </div>
               </>
             ) : (
               <div className="mt-6 text-center">
-                <div className="text-2xl md:text-3xl font-bold text-rose-600">It’s hug time 💖</div>
-                <div className="mt-1 text-xs md:text-sm text-slate-700">{fixedLabel}</div>
+                <div className="text-2xl md:text-3xl font-bold text-rose-600">
+                  It’s hug time 💖
+                </div>
+                <div className="mt-1 text-xs md:text-sm text-slate-700">
+                  {fixedLabel}
+                </div>
               </div>
             )}
           </div>
@@ -254,8 +321,16 @@ function Hero() {
       </motion.div>
 
       {/* Soft floating lights */}
-      <motion.div className="absolute -top-16 -right-20 w-72 h-72 rounded-full bg-white/30 blur-3xl" animate={{ y: [0, -10, 0] }} transition={{ duration: 8, repeat: Infinity }} />
-      <motion.div className="absolute -bottom-24 -left-10 w-96 h-96 rounded-full bg-white/25 blur-3xl" animate={{ y: [0, 12, 0] }} transition={{ duration: 10, repeat: Infinity }} />
+      <motion.div
+        className="absolute -top-16 -right-20 w-72 h-72 rounded-full bg-white/30 blur-3xl"
+        animate={{ y: [0, -10, 0] }}
+        transition={{ duration: 8, repeat: Infinity }}
+      />
+      <motion.div
+        className="absolute -bottom-24 -left-10 w-96 h-96 rounded-full bg-white/25 blur-3xl"
+        animate={{ y: [0, 12, 0] }}
+        transition={{ duration: 10, repeat: Infinity }}
+      />
     </div>
   );
 }
@@ -530,21 +605,35 @@ function TimeCapsule() {
 }
 
 // -----------------
-// Heart Pop (animated, with end summary)
+// Heart Pop (animated, with end summary) — hydration-safe
 // -----------------
 interface Bubble { id: number; x: number; y: number; size: number; speed: number; }
+
 function HeartGame() {
   const [running, setRunning] = useState(false);
   const [score, setScore] = useState(0);
   const [timeLeft, setTimeLeft] = useState(30);
   const [bubbles, setBubbles] = useState<Bubble[]>([]);
   const [confetti, setConfetti] = useState<number[]>([]);
-  const [high, setHigh] = useState<number>(() => { try { return Number(localStorage.getItem("ldr_highscore") || 0); } catch { return 0; } });
+  // IMPORTANT: defer localStorage read to the client to avoid SSR mismatch
+  const [high, setHigh] = useState<number | null>(null);
   const idRef = useRef(0);
+
+  // Load best score on the client only
+  useEffect(() => {
+    try {
+      const saved = Number(localStorage.getItem("ldr_highscore") || 0);
+      setHigh(Number.isFinite(saved) ? saved : 0);
+    } catch {
+      setHigh(0);
+    }
+  }, []);
 
   useEffect(() => {
     let timer: ReturnType<typeof setInterval> | null = null;
-    if (running && timeLeft > 0) timer = setInterval(() => setTimeLeft((t) => t - 1), 1000);
+    if (running && timeLeft > 0) {
+      timer = setInterval(() => setTimeLeft((t) => t - 1), 1000);
+    }
     return () => { if (timer) clearInterval(timer); };
   }, [running, timeLeft]);
 
@@ -552,17 +641,28 @@ function HeartGame() {
     if (timeLeft <= 0 && running) {
       setRunning(false);
       setConfetti(Array.from({ length: 36 }, (_, i) => i));
-      try { if (score > high) { localStorage.setItem("ldr_highscore", String(score)); setHigh(score); } } catch {}
+      try {
+        if (score > (high ?? 0)) {
+          localStorage.setItem("ldr_highscore", String(score));
+          setHigh(score);
+        }
+      } catch {}
       const t = setTimeout(() => setConfetti([]), 1600);
       return () => clearTimeout(t);
     }
   }, [timeLeft, running, score, high]);
 
   useEffect(() => {
-    let anim = 0; let last = performance.now();
+    let anim = 0;
+    let last = performance.now();
     function frame(now: number) {
-      const dt = (now - last) / 1000; last = now;
-      setBubbles((bs) => bs.map((b) => ({ ...b, y: b.y - b.speed * dt })).filter((b) => b.y + b.size > 0));
+      const dt = (now - last) / 1000;
+      last = now;
+      setBubbles((bs) =>
+        bs
+          .map((b) => ({ ...b, y: b.y - b.speed * dt }))
+          .filter((b) => b.y + b.size > 0)
+      );
       if (running) anim = requestAnimationFrame(frame);
     }
     if (running) anim = requestAnimationFrame(frame);
@@ -575,15 +675,30 @@ function HeartGame() {
       spawn = setInterval(() => {
         setBubbles((bs) => [
           ...bs,
-          { id: idRef.current++, x: Math.random() * 100, y: 100 + Math.random() * 10, size: 24 + Math.random() * 40, speed: 10 + Math.random() * 20 },
+          {
+            id: idRef.current++,
+            x: Math.random() * 100,
+            y: 100 + Math.random() * 10,
+            size: 24 + Math.random() * 40,
+            speed: 10 + Math.random() * 20,
+          },
         ]);
       }, 420);
     }
     return () => { if (spawn) clearInterval(spawn); };
   }, [running]);
 
-  function start() { setScore(0); setTimeLeft(30); setBubbles([]); setConfetti([]); setRunning(true); }
-  function pop(id: number) { setBubbles((bs) => bs.filter((b) => b.id !== id)); setScore((s) => s + 1); }
+  function start() {
+    setScore(0);
+    setTimeLeft(30);
+    setBubbles([]);
+    setConfetti([]);
+    setRunning(true);
+  }
+  function pop(id: number) {
+    setBubbles((bs) => bs.filter((b) => b.id !== id));
+    setScore((s) => s + 1);
+  }
 
   const overlay = !running && timeLeft === 0;
   const ppm = Math.round((score / 30) * 60);
@@ -591,42 +706,98 @@ function HeartGame() {
   return (
     <Card>
       <div className="flex items-center justify-between">
-        <h2 className="text-xl md:text-2xl font-bold flex items-center gap-2"><Gamepad2 className="w-5 h-5"/> Heart Pop (30s)</h2>
+        <h2 className="text-xl md:text-2xl font-bold flex items-center gap-2">
+          <Gamepad2 className="w-5 h-5" /> Heart Pop (30s)
+        </h2>
         <div className="flex items-center gap-3 text-sm">
-          <div className="rounded-xl px-3 py-1 bg-rose-100 border font-semibold">Score: {score}</div>
-          <div className="rounded-xl px-3 py-1 bg-rose-100 border font-semibold flex items-center gap-1"><Clock className="w-4 h-4"/> {timeLeft}s</div>
-          <div className="rounded-xl px-3 py-1 bg-slate-100 border font-semibold">Best: {high}</div>
+          <div className="rounded-xl px-3 py-1 bg-rose-100 border font-semibold">
+            Score: {score}
+          </div>
+          <div className="rounded-xl px-3 py-1 bg-rose-100 border font-semibold flex items-center gap-1">
+            <Clock className="w-4 h-4" /> {timeLeft}s
+          </div>
+          {/* hydration-safe: only the number is suppressed */}
+          <div className="rounded-xl px-3 py-1 bg-slate-100 border font-semibold">
+            Best: <span suppressHydrationWarning>{high ?? 0}</span>
+          </div>
         </div>
       </div>
+
       <div className="mt-3 h-64 rounded-2xl border bg-gradient-to-b from-rose-50 to-white relative overflow-hidden">
         <AnimatePresence>
           {bubbles.map((b) => (
-            <motion.button key={b.id} initial={{ scale: 0, opacity: 0 }} animate={{ scale: 1, opacity: 1 }} exit={{ scale: 0, opacity: 0 }} className="absolute" style={{ left: `${b.x}%`, top: `${b.y}%` }} onClick={() => pop(b.id)} aria-label="heart">
-              <Heart className="drop-shadow" style={{ width: b.size, height: b.size, color: "#e11d48" }} />
+            <motion.button
+              key={b.id}
+              initial={{ scale: 0, opacity: 0 }}
+              animate={{ scale: 1, opacity: 1 }}
+              exit={{ scale: 0, opacity: 0 }}
+              className="absolute"
+              style={{ left: `${b.x}%`, top: `${b.y}%` }}
+              onClick={() => pop(b.id)}
+              aria-label="heart"
+            >
+              <Heart
+                className="drop-shadow"
+                style={{ width: b.size, height: b.size, color: "#e11d48" }}
+              />
             </motion.button>
           ))}
         </AnimatePresence>
+
         {!running && timeLeft === 30 && (
           <div className="absolute inset-0 grid place-items-center text-center p-6">
             <div>
               <p className="text-slate-600 mb-3">Click hearts to score! Ready?</p>
-              <button onClick={start} className="rounded-2xl px-5 py-3 bg-rose-500 text-white font-semibold hover:bg-rose-600">Start</button>
+              <button
+                onClick={start}
+                className="rounded-2xl px-5 py-3 bg-rose-500 text-white font-semibold hover:bg-rose-600"
+              >
+                Start
+              </button>
             </div>
           </div>
         )}
+
         {overlay && (
           <div className="absolute inset-0 grid place-items-center text-center p-6 bg-white/75 backdrop-blur">
             <div className="max-w-sm w-full">
               <h3 className="text-xl font-bold">Nice run!</h3>
-              <div className="mt-2 text-slate-700">Hearts popped: <span className="font-semibold">{score}</span></div>
-              <div className="text-slate-700">Speed: <span className="font-semibold">{ppm}</span> pops/min</div>
-              <div className="text-slate-700">Best: <span className="font-semibold">{high}</span></div>
-              <button onClick={start} className="mt-4 rounded-2xl px-5 py-3 bg-rose-500 text-white font-semibold hover:bg-rose-600 w-full">Play again</button>
+              <div className="mt-2 text-slate-700">
+                Hearts popped: <span className="font-semibold">{score}</span>
+              </div>
+              <div className="text-slate-700">
+                Speed: <span className="font-semibold">{ppm}</span> pops/min
+              </div>
+              <div className="text-slate-700">
+                Best: <span className="font-semibold" suppressHydrationWarning>{high ?? 0}</span>
+              </div>
+              <button
+                onClick={start}
+                className="mt-4 rounded-2xl px-5 py-3 bg-rose-500 text-white font-semibold hover:bg-rose-600 w-full"
+              >
+                Play again
+              </button>
             </div>
           </div>
         )}
+
         {confetti.map((i) => (
-          <motion.div key={i} className="absolute" initial={{ opacity: 1, y: 0, x: 0, rotate: 0 }} animate={{ opacity: 0, y: -120 - Math.random()*60, x: (Math.random()-0.5)*140, rotate: Math.random()*360 }} transition={{ duration: 1.4 }} style={{ left: `${50 + (Math.random()-0.5)*40}%`, top: `70%` }}>
+          <motion.div
+            key={i}
+            className="absolute"
+            initial={{ opacity: 1, y: 0, x: 0, rotate: 0 }}
+            animate={{
+              opacity: 0,
+              y: -120 - Math.random() * 60,
+              x: (Math.random() - 0.5) * 140,
+              rotate: Math.random() * 360,
+            }}
+            transition={{ duration: 1.4 }}
+            style={{
+              left: `${50 + (Math.random() - 0.5) * 40}%`,
+              top: `70%`,
+            }}
+          >
             <Heart className="w-5 h-5" style={{ color: "#fb7185" }} />
           </motion.div>
         ))}
@@ -636,10 +807,9 @@ function HeartGame() {
 }
 
 // -----------------
-// Time Zones Pro (Sydney ↔ Toronto) with visualization — Toronto LOCKED
+// Time Zones Pro (Sydney ↔ Toronto) — per-TZ anchored bars + clean summary
 // -----------------
 function DualClockPro() {
-  // Fixed timezones
   const myTz = "Australia/Sydney";
   const partnerTz = "America/Toronto";
 
@@ -649,16 +819,34 @@ function DualClockPro() {
     return () => clearInterval(t);
   }, []);
 
-  // Viewer local timezone (used only for the Overlap row marker)
-  const viewerTz = useMemo(() => {
-    try {
-      return Intl.DateTimeFormat().resolvedOptions().timeZone || myTz;
-    } catch {
-      return myTz;
-    }
-  }, []);
+  // ---------- types ----------
+  type DayName =
+    | "Monday" | "Tuesday" | "Wednesday" | "Thursday" | "Friday" | "Saturday" | "Sunday";
+  type ClassSlot = { start: string; end: string; label: string };
+  type PersonName = keyof typeof schedules;
 
-  // --- Accurate timezone offset (minutes) for any IANA TZ ---
+  // ---------- local helpers ----------
+  function hhmmToPct(hhmm: string) {
+    const [h, m] = hhmm.split(":").map(Number);
+    return ((h * 60 + (m || 0)) / (24 * 60)) * 100;
+  }
+
+  function fmtClock(d: Date, tz: string) {
+    return new Intl.DateTimeFormat([], {
+      weekday: "short",
+      hour: "2-digit",
+      minute: "2-digit",
+      second: "2-digit",
+      hour12: false,
+      timeZone: tz,
+    }).format(d);
+  }
+
+  function weekdayLong(d: Date, tz: string): DayName {
+    return new Intl.DateTimeFormat("en-GB", { weekday: "long", timeZone: tz }).format(d) as DayName;
+  }
+
+  // Robust midnight in a given tz for *today in that tz*
   function tzOffsetMinutes(tz: string, at: Date) {
     const parts = new Intl.DateTimeFormat("en-GB", {
       timeZone: tz,
@@ -670,7 +858,6 @@ function DualClockPro() {
       second: "2-digit",
       hour12: false,
     }).formatToParts(at);
-
     const get = (t: string) => parts.find(p => p.type === t)?.value || "00";
     const y = Number(get("year"));
     const m = Number(get("month"));
@@ -678,215 +865,306 @@ function DualClockPro() {
     const h = Number(get("hour"));
     const mi = Number(get("minute"));
     const s = Number(get("second"));
-
-    // This is the epoch ms IF those parts were UTC
     const asUTC = Date.UTC(y, m - 1, d, h, mi, s);
-    // The real epoch ms is at.getTime(). Difference is the offset
-    const offsetMs = asUTC - at.getTime();
-    return Math.round(offsetMs / 60000); // minutes
+    return Math.round((asUTC - at.getTime()) / 60000);
+  }
+  function midnightInTz(when: Date, tz: string) {
+    const pads = new Intl.DateTimeFormat("en-GB", {
+      timeZone: tz,
+      year: "numeric",
+      month: "2-digit",
+      day: "2-digit",
+    }).formatToParts(when);
+    const y = Number(pads.find(p => p.type === "year")?.value || "1970");
+    const m = Number(pads.find(p => p.type === "month")?.value || "01");
+    const d = Number(pads.find(p => p.type === "day")?.value || "01");
+    const guessUTC = Date.UTC(y, m - 1, d, 0, 0, 0);
+    const off1 = tzOffsetMinutes(tz, new Date(guessUTC));
+    let T = guessUTC - off1 * 60000;
+    const off2 = tzOffsetMinutes(tz, new Date(T));
+    if (off2 !== off1) T = guessUTC - off2 * 60000;
+    return new Date(T);
   }
 
-  function tzDiffHoursAccurate(a: string, b: string, at: Date) {
-    const aMin = tzOffsetMinutes(a, at);
-    const bMin = tzOffsetMinutes(b, at);
-    return (bMin - aMin) / 60;
+  // Use *wall-clock* minutes to position the NOW hairline (fixes 1h drift)
+  function wallMinutes(d: Date, tz: string) {
+    return timeAt(d, tz).minutes; // 0..1439 (global helper you already have)
   }
 
-  // Consistent formatter
-  function fmt(date: Date, tz: string) {
-    try {
-      return new Intl.DateTimeFormat([], {
-        weekday: "short",
-        hour: "2-digit",
-        minute: "2-digit",
-        second: "2-digit",
-        hour12: false,
-        timeZone: tz,
-      }).format(date);
-    } catch {
-      return "Invalid timezone";
+  // ----- Anchored awake mask for bars (15-min) -----
+  function bothAwakeMaskAnchored(anchorTz: string, stepMin = 15) {
+    const steps = Math.floor(1440 / stepMin);
+    const startMid = midnightInTz(new Date(), anchorTz);
+    const mask: boolean[] = new Array(steps);
+    for (let i = 0; i < steps; i++) {
+      const when = new Date(startMid.getTime() + i * stepMin * 60000);
+      const a = isAwake(when, myTz, 8, 24);
+      const b = isAwake(when, partnerTz, 8, 24);
+      mask[i] = a && b;
     }
+    return mask;
   }
 
-  // Awake window 08:00–24:00
-  function computeOverlapTimeline24(base: Date, tzA: string, tzB: string, stepMin = 15) {
-    const items: { idx: number; when: Date; aAwake: boolean; bAwake: boolean; both: boolean }[] = [];
-    const start = new Date(base.getTime());
-    start.setSeconds(0, 0);
-    for (let i = 0; i < Math.floor(1440 / stepMin); i++) {
-      const when = new Date(start.getTime() + i * stepMin * 60000);
-      const aAwake = isAwake(when, tzA, 8, 24);
-      const bAwake = isAwake(when, tzB, 8, 24);
-      items.push({ idx: i, when, aAwake, bAwake, both: aAwake && bAwake });
+  // ----- Clean interval math for footer text (on the hour, no :15) -----
+  function todaysAwakeInterval(tz: string, startHour = 8, endHour = 24) {
+    const mid = midnightInTz(new Date(), tz);
+    const start = new Date(mid.getTime() + startHour * 3600000);
+    const end   = new Date(mid.getTime() + endHour  * 3600000);
+    return { start, end, tz };
+  }
+  function intersectUTC(a: {start: Date; end: Date}, b: {start: Date; end: Date}) {
+    const start = new Date(Math.max(a.start.getTime(), b.start.getTime()));
+    const end   = new Date(Math.min(a.end.getTime(),   b.end.getTime()));
+    return start < end ? { start, end } : null;
+  }
+  function toHour00Label(d: Date, tz: string) {
+    const parts = new Intl.DateTimeFormat("en-GB", {
+      hour: "2-digit", minute: "2-digit", hour12: false, timeZone: tz,
+    }).formatToParts(d);
+    const h = parts.find(p => p.type === "hour")?.value ?? "00";
+    return `${h}:00`;
+  }
+  function currentOrNextWindow() {
+    const A = todaysAwakeInterval(myTz, 8, 24);
+    const B = todaysAwakeInterval(partnerTz, 8, 24);
+    let over = intersectUTC(A, B);
+    const nowUTC = now;
+
+    if (!over) {
+      // Fallback: should not happen with 08–24, but just in case use tomorrow’s.
+      const A2 = { start: new Date(A.start.getTime()+86400000), end: new Date(A.end.getTime()+86400000) };
+      const B2 = { start: new Date(B.start.getTime()+86400000), end: new Date(B.end.getTime()+86400000) };
+      over = intersectUTC(A2, B2)!;
     }
-    return items;
-  }
 
-  function findNextGoodWindow24(base: Date, tzA: string, tzB: string, minMinutes = 45) {
-    const timeline = computeOverlapTimeline24(base, tzA, tzB, 15);
-    let startIdx = -1;
-    for (let i = 0; i < timeline.length; i++) {
-      if (timeline[i].both) {
-        if (startIdx === -1) startIdx = i;
-      } else if (startIdx !== -1) {
-        const len = (i - startIdx) * 15;
-        if (len >= minMinutes) {
-          const start = new Date(timeline[startIdx].when);
-          const end = new Date(timeline[i - 1].when.getTime() + 15 * 60000);
-          return { start, end };
-        }
-        startIdx = -1;
-      }
+    let status: "current" | "next";
+    if (nowUTC >= over.start && nowUTC < over.end) {
+      status = "current";
+    } else if (nowUTC < over.start) {
+      status = "next";
+    } else {
+      // after today's overlap → tomorrow's window
+      over = { start: new Date(over.start.getTime()+86400000),
+               end:   new Date(over.end.getTime()+86400000) };
+      status = "next";
     }
-    if (startIdx !== -1) {
-      const len = (timeline.length - startIdx) * 15;
-      if (len >= minMinutes) {
-        const start = new Date(timeline[startIdx].when);
-        const end = new Date(timeline[timeline.length - 1].when.getTime() + 15 * 60000);
-        return { start, end };
-      }
-    }
-    return null;
-  }
 
-  const delta = tzDiffHoursAccurate(myTz, partnerTz, now); // <-- no longer 0
-  const timeline = computeOverlapTimeline24(now, myTz, partnerTz, 15);
-  const nextWin = findNextGoodWindow24(now, myTz, partnerTz, 45);
+    const startA = toHour00Label(over.start, myTz);
+    const endA   = toHour00Label(over.end,   myTz);
+    const startB = toHour00Label(over.start, partnerTz);
+    const endB   = toHour00Label(over.end,   partnerTz);
 
-  function toLabel(d: Date, tz: string) {
-    const p = new Intl.DateTimeFormat("en-GB", { hour: "2-digit", minute: "2-digit", hour12: false, timeZone: tz }).formatToParts(d);
-    const h = p.find(x => x.type === "hour")?.value || "00";
-    const m = p.find(x => x.type === "minute")?.value || "00";
-    return `${h}:${m}`;
-  }
-
-  // “time until next window” (viewer’s local clock for countdown precision)
-  const nextIn = useMemo(() => {
-    if (!nextWin) return null;
-    const ms = nextWin.start.getTime() - now.getTime();
-    const mins = Math.max(0, Math.floor(ms / 60000));
+    const msToStart = Math.max(0, over.start.getTime() - nowUTC.getTime());
+    const mins = Math.floor(msToStart / 60000);
     const h = Math.floor(mins / 60);
     const m = mins % 60;
-    return { h, m };
-  }, [nextWin, now]);
+
+    return { status, startA, endA, startB, endB, h, m };
+  }
+
+  // ---------- derived data ----------
+  const bothSydney  = bothAwakeMaskAnchored(myTz, 15);
+  const bothToronto = bothAwakeMaskAnchored(partnerTz, 15);
+  const summary     = currentOrNextWindow();
 
   const people = [
-    { label: "Farhan", tz: myTz, tzLabel: "Australia/Sydney" },
-    { label: "Nabila", tz: partnerTz, tzLabel: "America/Toronto" },
-  ] as const;
+    { label: "Farhan" as PersonName, tz: myTz, tzLabel: "Australia/Sydney" },
+    { label: "Nabila" as PersonName, tz: partnerTz, tzLabel: "America/Toronto" },
+  ];
 
+  // ---------- UI pieces ----------
+  function ClassBar({ tz, name, slots }: { tz: string; name: PersonName; slots: ClassSlot[] }) {
+  const pctNow = (wallMinutes(now, tz) / (24 * 60)) * 100;
+
+  return (
+    <div className="mt-2">
+      {/* rail: clip contents so highlights don't "bocor" */}
+      <div className="relative h-6 rounded-full overflow-hidden border bg-gradient-to-r from-slate-50 to-white">
+        {/* hour grid */}
+        <div className="absolute inset-0 grid grid-cols-24 overflow-hidden pointer-events-none">
+          {Array.from({ length: 24 }).map((_, h) => (
+            <div key={h} className="border-r last:border-0 border-slate-100" />
+          ))}
+        </div>
+
+        {/* awake band 08–24 (square ends) */}
+        <div
+          className="absolute top-0 bottom-0 bg-rose-200/60 pointer-events-none"
+          style={{ left: `${(8 / 24) * 100}%`, width: `${((24 - 8) / 24) * 100}%` }}
+        />
+
+        {/* class chips (rounded) */}
+        {slots.map((s, i) => {
+          const left = hhmmToPct(s.start);
+          const width = hhmmToPct(s.end) - left;
+          const label = s.label;
+          return (
+            <div
+              key={`${name}-${i}`}
+              className="group absolute top-0 bottom-0 rounded-full bg-rose-400/60 border border-rose-400/70 hover:bg-rose-500/70 focus-within:bg-rose-500/70"
+              style={{ left: `${left}%`, width: `${width}%`, zIndex: 2 }}
+              title={label}
+            >
+              <button
+                aria-label={label}
+                className="absolute inset-0 outline-none rounded-full focus-visible:ring-2 focus-visible:ring-rose-400"
+                tabIndex={0}
+              />
+              {/* tooltip will now be clipped by the rail; remove if you prefer unclipped */}
+              <div
+                className="
+                  pointer-events-none absolute -top-9 left-1/2 -translate-x-1/2
+                  whitespace-nowrap rounded-xl border border-rose-100
+                  bg-white/95 backdrop-blur px-2.5 py-1
+                  text-[11px] font-medium text-slate-800 shadow-[0_8px_24px_-8px_rgba(225,29,72,0.25)]
+                  opacity-0 translate-y-1 scale-[0.98]
+                  transition duration-100 ease-out
+                  group-hover:opacity-100 group-hover:translate-y-0 group-hover:scale-100
+                  group-focus-within:opacity-100 group-focus-within:translate-y-0 group-focus-within:scale-100
+                "
+              >
+                {s.label}
+                <span className="absolute left-1/2 top-full h-2 w-2 -translate-x-1/2 -translate-y-[3px] rotate-45 rounded-[2px] bg-white/95 border border-rose-100" />
+              </div>
+            </div>
+          );
+        })}
+
+        {/* NOW hairline (wall-clock accurate) */}
+        <div
+          className="absolute top-[1px] bottom-[1px] w-px bg-rose-600"
+          style={{ left: `calc(${pctNow}% - 0.5px)` }}
+        />
+      </div>
+
+      {/* Only 0 and 24 */}
+      <div className="mt-1 flex justify-between text-[9px] text-slate-400 px-[1px]">
+        <span>0</span>
+        <span>24</span>
+      </div>
+    </div>
+  );
+}
+
+  function OverlapBar({ label, tz, mask }: { label: string; tz: string; mask: boolean[] }) {
+    const pctNow = (wallMinutes(now, tz) / (24 * 60)) * 100;
+
+    return (
+      <div>
+        <div className="flex justify-between items-center text-[10px] text-slate-500 mb-1">
+          <span>{label}</span>
+          <span>both awake</span>
+        </div>
+        <div className="relative h-6 overflow-hidden border bg-gradient-to-r from-slate-50 to-white rounded-full">
+          <div className="absolute inset-0 flex">
+            {mask.map((on, i) => (
+              <div
+                key={i}
+                className={`h-full ${on ? "bg-emerald-200/70" : "bg-transparent"}`}
+                style={{ width: `${100 / mask.length}%` }}
+              />
+            ))}
+          </div>
+          {/* hairline */}
+          <div
+            className="absolute top-[1px] bottom-[1px] w-px bg-rose-600"
+            style={{ left: `calc(${pctNow}% - 0.5px)` }}
+          />
+        </div>
+        <div className="mt-1 flex justify-between text-[9px] text-slate-400 px-[1px]">
+          <span>0</span>
+          <span>24</span>
+        </div>
+      </div>
+    );
+  }
+
+  // ---------- render ----------
   return (
     <Card className="h-full">
       <h2 className="text-xl md:text-2xl font-bold flex items-center gap-2">
         <Globe2 className="w-5 h-5" /> Sydney ↔ Toronto
       </h2>
 
-      {/* Person tiles (same layout, aligned) */}
+      {/* Top tiles */}
       <div className="grid md:grid-cols-2 gap-4 mt-3">
-        {people.map(p => (
+        {people.map((p) => (
           <div key={p.label} className="rounded-2xl p-4 border bg-white/70">
             <div className="flex items-center justify-between">
               <div className="text-xs uppercase tracking-wide text-slate-600">{p.label}</div>
               <div className="text-[10px] text-slate-500">{p.tzLabel}</div>
             </div>
-            <div className="mt-1">
-              <div className="text-2xl font-semibold leading-tight tabular-nums">{fmt(now, p.tz)}</div>
+            <div className="mt-1 text-2xl font-semibold leading-tight tabular-nums">
+              {fmtClock(now, p.tz)}
             </div>
           </div>
         ))}
       </div>
 
-      {/* Timelines */}
-      <div className="mt-4 space-y-4">
-        {people.map((row, rIdx) => (
-          <div key={row.label} className="w-full">
-            <div className="flex justify-between items-center text-[10px] text-slate-500 mb-1">
-              <span className="font-medium">{row.label}</span>
-              <span>24h</span>
-            </div>
-
-            <div className="relative h-6 rounded-full overflow-hidden border bg-gradient-to-r from-slate-50 to-white">
-              {/* hour grid */}
-              <div className="absolute inset-0 grid grid-cols-24">
-                {Array.from({ length: 24 }).map((_, h) => (
-                  <div key={h} className="border-r last:border-0 border-slate-100" />
-                ))}
+      {/* Per-person bars + lists */}
+      <div className="mt-4 space-y-6">
+        {people.map((p) => {
+          const day = weekdayLong(now, p.tz);
+          const personSchedule =
+            (schedules[p.label] as Record<DayName, ClassSlot[] | undefined>) || {};
+          const todaySlots = personSchedule[day] ?? [];
+          return (
+            <div key={p.label}>
+              <div className="text-[11px] text-slate-600 mb-1">{p.label}</div>
+              <ClassBar tz={p.tz} name={p.label} slots={todaySlots} />
+              <div className="mt-3 rounded-2xl border bg-white/70 p-4">
+                <div className="text-[11px] uppercase tracking-wide text-slate-500">
+                  TODAY’S CLASSES ({day})
+                </div>
+                {todaySlots.length ? (
+                  <div className="mt-2 grid gap-y-1 text-sm">
+                    {todaySlots.map((s, i) => (
+                      <div key={i} className="flex justify-between">
+                        <div>{s.label}</div>
+                        <div className="tabular-nums text-slate-600">
+                          {s.start} — {s.end}
+                        </div>
+                      </div>
+                    ))}
+                  </div>
+                ) : (
+                  <div className="mt-2 text-sm text-slate-600">No classes today.</div>
+                )}
               </div>
-
-              {/* awake shading */}
-              <div className="absolute inset-0 flex">
-                {timeline.map((t, i) => {
-                  const awake = rIdx === 0 ? t.aAwake : t.bAwake;
-                  return (
-                    <div
-                      key={i}
-                      className={`h-full ${awake ? "bg-rose-200/60" : "bg-transparent"}`}
-                      style={{ width: `${100 / timeline.length}%` }}
-                    />
-                  );
-                })}
-              </div>
-
-              {/* NOW marker: use THAT ROW's timezone (fixes Nabila’s marker) */}
-              <div
-                className="absolute top-0 bottom-0 w-[2px] bg-rose-500"
-                style={{ left: `${(timeAt(now, row.tz).minutes / (24 * 60)) * 100}%` }}
-              />
             </div>
+          );
+        })}
+      </div>
 
-            {/* ticks */}
-            <div className="mt-1 flex justify-between text-[9px] text-slate-400 px-0.5">
-              {Array.from({ length: 9 }).map((_, i) => (
-                <span key={i}>{i * 3}</span>
-              ))}
-            </div>
-          </div>
-        ))}
+      {/* Overlap — each anchored to its own timezone's midnight */}
+      <div className="mt-6 space-y-4">
+        <OverlapBar label="Overlap (Sydney time)" tz={myTz} mask={bothSydney} />
+        <OverlapBar label="Overlap (Toronto time)" tz={partnerTz} mask={bothToronto} />
 
-        {/* Overlap row: marker in viewer’s local time (as requested previously) */}
-        <div>
-          <div className="flex justify-between items-center text-[10px] text-slate-500 mb-1">
-            <span>Overlap</span>
-            <span>both awake</span>
-          </div>
-          <div className="relative h-6 rounded-full overflow-hidden border bg-gradient-to-r from-slate-50 to-white">
-            <div className="absolute inset-0 flex">
-              {timeline.map((t, i) => (
-                <div
-                  key={i}
-                  className={`h-full ${t.both ? "bg-emerald-200/70" : "bg-transparent"}`}
-                  style={{ width: `${100 / timeline.length}%` }}
-                />
-              ))}
-            </div>
-            <div
-              className="absolute top-0 bottom-0 w-[2px] bg-rose-500"
-              style={{ left: `${(timeAt(now, viewerTz).minutes / (24 * 60)) * 100}%` }}
-            />
-          </div>
-
-          <div className="mt-1 text-xs text-slate-600 flex flex-wrap items-center gap-x-3 gap-y-1">
-            <span>
-              Time difference: <span className="font-semibold">{delta >= 0 ? "+" + delta : delta}h</span>
-            </span>
-            {nextWin ? (
-              <>
-                <span>
-                  Next window:{" "}
-                  <span className="font-semibold">
-                    {toLabel(nextWin.start, viewerTz)}–{toLabel(nextWin.end, viewerTz)}
-                  </span>{" "}
-                  (your time)
-                </span>
-                <span className="text-[11px] px-2 py-0.5 rounded-lg border bg-white/70">
-                  in {nextIn!.h}h {String(nextIn!.m).padStart(2, "0")}m
-                </span>
-              </>
-            ) : (
-              <span>No 45-min overlap in next 24h</span>
-            )}
-          </div>
-        </div>
+        {/* Summary (interval math) */}
+        {/* Summary (interval math) */}
+<div className="mt-1 text-xs text-slate-600 flex flex-wrap items-center gap-x-3 gap-y-1">
+  {summary.status === "current" ? (
+    <span className="font-semibold">Currently in window</span>
+  ) : (
+    <>
+      <span>
+        Next window:{" "}
+        <span className="font-semibold">
+          {summary.startA}–{summary.endA}
+        </span>{" "}
+        (Sydney) ·{" "}
+        <span className="font-semibold">
+          {summary.startB}–{summary.endB}
+        </span>{" "}
+        (Toronto)
+      </span>
+      <span className="text-[11px] px-2 py-0.5 rounded-lg border bg-white/70">
+        in {summary.h}h {String(summary.m).padStart(2, "0")}m
+      </span>
+    </>
+  )}
+</div>
       </div>
     </Card>
   );
@@ -1043,7 +1321,6 @@ function DevTests() {
 // App
 // -----------------
 export default function LittleLoveHub() {
-  useFavicon();
   return (
     <div className="min-h-screen w-full bg-gradient-to-b from-slate-50 via-white to-slate-50 text-slate-900">
       <div className="max-w-7xl mx-auto px-6 md:px-8 py-8 md:py-12">
